@@ -1,47 +1,28 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
+import itertools
 import numpy as np
 import os
 import xml.etree.ElementTree as ET
 from typing import List, Tuple, Union
 from fvcore.common.file_io import PathManager
-import itertools
-import logging
 
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.structures import BoxMode
 
-__all__ = ["load_voc_instances", "register_pascal_voc"]
-
-
-# fmt: off
-# CLASS_NAMES = (
-#     "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat",
-#     "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person",
-#     "pottedplant", "sheep", "sofa", "train", "tvmonitor"
-# )
-# CLASS_NAMES = (
-#     "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat",
-#     "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person",
-#     "pottedplant", "sheep", "sofa", "train", "tvmonitor", "unknown"
-# )
-# fmt: on
-
-VOC_CLASS_NAMES_COCOFIED = [
-    "airplane",  "dining table", "motorcycle",
-    "potted plant", "couch", "tv"
-]
-
-BASE_VOC_CLASS_NAMES = [
-    "aeroplane", "diningtable", "motorbike",
-    "pottedplant",  "sofa", "tvmonitor"
-]
+__all__ = ["load_voc_coco_instances", "register_voc_style_coco"]
 
 VOC_CLASS_NAMES = [
     "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat",
     "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person",
     "pottedplant", "sheep", "sofa", "train", "tvmonitor"
+]
+
+VOC_CLASS_NAMES_COCOFIED = [
+    "airplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat",
+    "chair", "cow", "dining table", "dog", "horse", "motorcycle", "person",
+    "potted plant", "sheep", "couch", "train", "tv"
 ]
 
 T2_CLASS_NAMES = [
@@ -67,19 +48,33 @@ T4_CLASS_NAMES = [
 
 UNK_CLASS = ["unknown"]
 
-VOC_COCO_CLASS_NAMES = tuple(itertools.chain(VOC_CLASS_NAMES, T2_CLASS_NAMES, T3_CLASS_NAMES, T4_CLASS_NAMES, UNK_CLASS))
+# INCR_CLASS_NAMES = itertools.chain(VOC_CLASS_NAMES, T2_CLASS_NAMES, T3_CLASS_NAMES, T4_CLASS_NAMES, UNK_CLASS)
+INCR_CLASS_NAMES = itertools.chain(VOC_CLASS_NAMES,  UNK_CLASS)
+INCR_CLASS_NAMES = tuple(INCR_CLASS_NAMES)
 
-def load_voc_instances(dirname: str, split: str, class_names: Union[List[str], Tuple[str, ...]]):
+INCR_CLASS_NAMES_2 = tuple(itertools.chain(VOC_CLASS_NAMES_COCOFIED,  UNK_CLASS))
+
+def load_voc_coco_instances(dirname: str, split: str, class_names: Union[List[str], Tuple[str, ...]]):
     """
     Load Pascal VOC detection annotations to Detectron2 format.
 
     Args:
         dirname: Contain "Annotations", "ImageSets", "JPEGImages"
-        split (str): one of "train", "test", "val", "trainval"
+        split (str): one of "train", "test", "val", "trainval": t1_train, t1_test
         class_names: list or tuple of class names
     """
     with PathManager.open(os.path.join(dirname, "ImageSets", "Main", split + ".txt")) as f:
-        fileids = np.loadtxt(f, dtype=np.str_)
+        fileids = np.loadtxt(f, dtype=np.str)
+
+    known_class_list = None
+    if 't2' in split:
+        known_class_list = T2_CLASS_NAMES
+    elif 't3' in split:
+        known_class_list = T3_CLASS_NAMES
+    elif 't4' in split:
+        known_class_list = T4_CLASS_NAMES
+
+    unknown_class_list = tuple(itertools.chain(T2_CLASS_NAMES, T3_CLASS_NAMES, T4_CLASS_NAMES))
 
     # Needs to read many small annotation files. Makes sense at local
     annotation_dirname = PathManager.get_local_path(os.path.join(dirname, "Annotations/"))
@@ -88,13 +83,8 @@ def load_voc_instances(dirname: str, split: str, class_names: Union[List[str], T
         anno_file = os.path.join(annotation_dirname, fileid + ".xml")
         jpeg_file = os.path.join(dirname, "JPEGImages", fileid + ".jpg")
 
-        try:
-            with PathManager.open(anno_file) as f:
-                tree = ET.parse(f)
-        except:
-            logger = logging.getLogger(__name__)
-            logger.info('Not able to load: ' + anno_file + '. Continuing without aboarting...')
-            continue
+        with PathManager.open(anno_file) as f:
+            tree = ET.parse(f)
 
         r = {
             "file_name": jpeg_file,
@@ -105,9 +95,21 @@ def load_voc_instances(dirname: str, split: str, class_names: Union[List[str], T
         instances = []
 
         for obj in tree.findall("object"):
-            cls = obj.find("name").text
-            if cls in VOC_CLASS_NAMES_COCOFIED:
-                cls = BASE_VOC_CLASS_NAMES[VOC_CLASS_NAMES_COCOFIED.index(cls)]
+            cls_name = obj.find("name").text
+
+            cls = cls_name
+
+            if cls_name in unknown_class_list:
+                cls = "unknown"
+
+            # if cls_name not in known_class_list:
+            #     continue
+            #
+            # if 'unk' in split:
+            #     cls = "unknown"
+            # else:
+            #     cls = cls_name
+
             # We include "difficult" samples in training.
             # Based on limited experiments, they don't hurt accuracy.
             # difficult = int(obj.find("difficult").text)
@@ -121,21 +123,21 @@ def load_voc_instances(dirname: str, split: str, class_names: Union[List[str], T
             # In coordinate space this is represented by (xmin=0, xmax=W)
             bbox[0] -= 1.0
             bbox[1] -= 1.0
-            instances.append(
-                {"category_id": class_names.index(cls), "bbox": bbox, "bbox_mode": BoxMode.XYXY_ABS}
-            )
+            try:
+                instances.append(
+                    {"category_id": INCR_CLASS_NAMES_2.index(cls), "bbox": bbox, "bbox_mode": BoxMode.XYXY_ABS}
+                )
+            except:
+                print(cls)
+                print(class_names)
+                print(unknown_class_list)
         r["annotations"] = instances
         dicts.append(r)
     return dicts
 
 
-def register_pascal_voc(name, dirname, split, year):
-    # if "voc_coco" in name:
-    #     class_names = VOC_COCO_CLASS_NAMES
-    # else:
-    #     class_names = tuple(VOC_CLASS_NAMES)
-    class_names = VOC_COCO_CLASS_NAMES
-    DatasetCatalog.register(name, lambda: load_voc_instances(dirname, split, class_names))
+def register_voc_style_coco(name, dirname, split, year, class_names=INCR_CLASS_NAMES):
+    DatasetCatalog.register(name, lambda: load_voc_coco_instances(dirname, split, class_names))
     MetadataCatalog.get(name).set(
         thing_classes=list(class_names), dirname=dirname, year=year, split=split
     )

@@ -604,6 +604,32 @@ _C.TEST.AUG.FLIP = True
 _C.TEST.PRECISE_BN = CN({"ENABLED": False})
 _C.TEST.PRECISE_BN.NUM_ITER = 200
 
+
+# ---------------------------------------------------------------------------- #
+# OpenWorld Object Detection
+# ---------------------------------------------------------------------------- #
+_C.OWOD = CN()
+_C.OWOD.ENABLE_THRESHOLD_AUTOLABEL_UNK = False
+_C.OWOD.NUM_UNK_PER_IMAGE = 1
+_C.OWOD.ENABLE_UNCERTAINITY_AUTOLABEL_UNK = False
+_C.OWOD.ENABLE_CLUSTERING = False
+
+_C.OWOD.CLUSTERING = CN()
+_C.OWOD.CLUSTERING.ITEMS_PER_CLASS = 10
+_C.OWOD.CLUSTERING.START_ITER = 100
+_C.OWOD.CLUSTERING.UPDATE_MU_ITER = 200
+_C.OWOD.CLUSTERING.MOMENTUM = 0.9
+_C.OWOD.CLUSTERING.Z_DIMENSION = 64
+_C.OWOD.CLUSTERING.MARGIN = 10.0
+
+_C.OWOD.PREV_INTRODUCED_CLS = 0
+_C.OWOD.CUR_INTRODUCED_CLS = 20
+_C.OWOD.COMPUTE_ENERGY = False
+_C.OWOD.ENERGY_SAVE_PATH = ''
+_C.OWOD.SKIP_TRAINING_WHILE_EVAL = False
+_C.OWOD.FEATURE_STORE_SAVE_PATH = ''
+_C.OWOD.TEMPERATURE = 1.5
+
 # ---------------------------------------------------------------------------- #
 # Misc options
 # ---------------------------------------------------------------------------- #

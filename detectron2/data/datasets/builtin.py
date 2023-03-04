@@ -221,11 +221,26 @@ def register_all_pascal_voc(root):
     SPLITS = [
         ("voc_2007_trainval", "VOC2007", "trainval"),
         ("voc_2007_train", "VOC2007", "train"),
+        ("voc_2007_trn_ft", "VOC2007", "train_ft_1"),
         ("voc_2007_val", "VOC2007", "val"),
         ("voc_2007_test", "VOC2007", "test"),
         ("voc_2012_trainval", "VOC2012", "trainval"),
         ("voc_2012_train", "VOC2012", "train"),
         ("voc_2012_val", "VOC2012", "val"),
+        ("t1_voc_coco_2007_train", "VOC2007", "t1_train"),
+        ("t1_voc_coco_2007_val_with_known_and_unk", "VOC2007", "t1_train_with_unk"),
+        ("t2_voc_coco_2007_val_with_known_and_unk", "VOC2007", "t2_train_with_unk"),
+        ("t3_voc_coco_2007_val_with_known_and_unk", "VOC2007", "t3_train_with_unk"),
+        ("t4_voc_coco_2007_val_with_known_and_unk", "VOC2007", "t4_train"),
+        ("t1_voc_coco_2007_known_test", "VOC2007", "t1_known_test"),
+        ("voc_coco_2007_test", "VOC2007", "all_task_test"),
+        ("voc_coco_2007_val", "VOC2007", "all_task_val"),
+        ("t2_voc_coco_2007_train", "VOC2007", "t2_train"),
+        ("t2_voc_coco_2007_ft", "VOC2007", "t2_ft"),
+        ("t3_voc_coco_2007_train", "VOC2007", "t3_train"),
+        ("t3_voc_coco_2007_ft", "VOC2007", "t3_ft"),
+        ("t4_voc_coco_2007_train", "VOC2007", "t4_train"),
+        ("t4_voc_coco_2007_ft", "VOC2007", "t4_ft"),
     ]
     for name, dirname, split in SPLITS:
         year = 2007 if "2007" in name else 2012
