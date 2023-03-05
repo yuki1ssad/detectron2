@@ -250,7 +250,7 @@ _C.MODEL.RPN.CONV_DIMS = [-1]
 _C.MODEL.ROI_HEADS = CN()
 _C.MODEL.ROI_HEADS.NAME = "Res5ROIHeads"
 # Number of foreground classes
-_C.MODEL.ROI_HEADS.NUM_CLASSES = 80
+_C.MODEL.ROI_HEADS.NUM_CLASSES = 81
 # Names of the input feature maps to be used by ROI heads
 # Currently all heads (box, mask, ...) use the same input feature map list
 # e.g., ["p2", "p3", "p4", "p5"] is commonly used for FPN
@@ -618,6 +618,18 @@ _C.TEST.AUG.FLIP = True
 
 _C.TEST.PRECISE_BN = CN({"ENABLED": False})
 _C.TEST.PRECISE_BN.NUM_ITER = 200
+
+# ---------------------------------------------------------------------------- #
+# OpenWorld Object Detection
+# ---------------------------------------------------------------------------- #
+
+_C.OWOD = CN()
+_C.OWOD.PREV_INTRODUCED_CLS = 0
+_C.OWOD.CUR_INTRODUCED_CLS = 20
+_C.OWOD.ENERGY_SAVE_PATH = ''
+_C.OWOD.SKIP_TRAINING_WHILE_EVAL = False
+_C.OWOD.FEATURE_STORE_SAVE_PATH = ''
+_C.OWOD.TEMPERATURE = 1.5
 
 # ---------------------------------------------------------------------------- #
 # Misc options

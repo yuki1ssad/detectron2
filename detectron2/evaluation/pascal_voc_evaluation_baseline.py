@@ -2,6 +2,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 
 import logging
+logging.basicConfig(level=logging.INFO)
 import numpy as np
 import os
 import tempfile
@@ -17,7 +18,7 @@ from detectron2.utils.file_io import PathManager
 from .evaluator import DatasetEvaluator
 
 
-class PascalVOCDetectionEvaluator(DatasetEvaluator):
+class PascalVOCDetectionEvaluator_baseline(DatasetEvaluator):
     """
     Evaluate Pascal VOC style AP for Pascal VOC dataset.
     It contains a synchronization, therefore has to be called from all ranks.
@@ -35,12 +36,7 @@ class PascalVOCDetectionEvaluator(DatasetEvaluator):
         """
         self._dataset_name = dataset_name
         meta = MetadataCatalog.get(dataset_name)
-
-        # Too many tiny files, download all to local for speed.
-        annotation_dir_local = PathManager.get_local_path(
-            os.path.join(meta.dirname, "Annotations/")
-        )
-        self._anno_file_template = os.path.join(annotation_dir_local, "{}.xml")
+        self._anno_file_template = os.path.join(meta.dirname, "Annotations", "{}.xml")
         self._image_set_path = os.path.join(meta.dirname, "ImageSets", "Main", meta.split + ".txt")
         self._class_names = meta.thing_classes
         assert meta.year in [2007, 2012], meta.year
@@ -48,6 +44,7 @@ class PascalVOCDetectionEvaluator(DatasetEvaluator):
         self._is_2007 = False
         self._cpu_device = torch.device("cpu")
         self._logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
 
         self.prev_intro_cls = cfg.OWOD.PREV_INTRODUCED_CLS
         self.curr_intro_cls = cfg.OWOD.CUR_INTRODUCED_CLS
@@ -55,8 +52,8 @@ class PascalVOCDetectionEvaluator(DatasetEvaluator):
         self.known_classes = self._class_names[:self.num_seen_classes]
 
         self.num_class = cfg.MODEL.SparseRCNN.NUM_CLASSES
-        self.unknown_class_index = self.num_seen_classes
-        
+        self.unknown_class_index = self.num_class
+
     def reset(self):
         self._predictions = defaultdict(list)  # class name -> list of prediction strings
 
@@ -72,7 +69,7 @@ class PascalVOCDetectionEvaluator(DatasetEvaluator):
                 # The inverse of data loading logic in `datasets/pascal_voc.py`
                 xmin += 1
                 ymin += 1
-                if cls == self.unknown_class_index: cls = self.num_class
+                # if cls == self.unknown_class_index: cls = self.num_class
                 self._predictions[cls].append(
                     f"{image_id} {score:.3f} {xmin:.1f} {ymin:.1f} {xmax:.1f} {ymax:.1f}"
                 )
@@ -110,7 +107,7 @@ class PascalVOCDetectionEvaluator(DatasetEvaluator):
             num_unks = defaultdict(list)
             tp_plus_fp_cs = defaultdict(list)
             fp_os = defaultdict(list)
-            
+
             for cls_id, cls_name in enumerate(self._class_names):
                 lines = predictions.get(cls_id, [""])
                 self._logger.info(cls_name + " has " + str(len(lines)) + " predictions.")
@@ -296,7 +293,7 @@ def parse_rec(filename, known_classes):
         logger = logging.getLogger(__name__)
         logger.info('Not able to load: ' + filename + '. Continuing without aboarting...')
         return None
-    
+
     objects = []
     for obj in tree.findall("object"):
         obj_struct = {}
@@ -352,7 +349,6 @@ def voc_ap(rec, prec, use_07_metric=False):
         ap = np.sum((mrec[i + 1] - mrec[i]) * mpre[i + 1])
     return ap
 
-
 def voc_eval(detpath, annopath, imagesetfile, classname, ovthresh=0.5, use_07_metric=False, known_classes=None):
     """rec, prec, ap = voc_eval(detpath,
                                 annopath,
@@ -400,8 +396,8 @@ def voc_eval(detpath, annopath, imagesetfile, classname, ovthresh=0.5, use_07_me
     for imagename in imagenames:
         R = [obj for obj in recs[imagename] if obj["name"] == classname]
         bbox = np.array([x["bbox"] for x in R])
-        difficult = np.array([x["difficult"] for x in R]).astype(bool)
-        # difficult = np.array([False for x in R]).astype(bool)  # treat all "difficult" as GT
+        difficult = np.array([x["difficult"] for x in R]).astype(np.bool)
+        # difficult = np.array([False for x in R]).astype(np.bool)  # treat all "difficult" as GT
         det = [False] * len(R)
         npos = npos + sum(~difficult)
         class_recs[imagename] = {"bbox": bbox, "difficult": difficult, "det": det}
@@ -425,6 +421,10 @@ def voc_eval(detpath, annopath, imagesetfile, classname, ovthresh=0.5, use_07_me
     nd = len(image_ids)
     tp = np.zeros(nd)
     fp = np.zeros(nd)
+
+    # if 'unknown' not in classname:
+    #     return tp, fp, 0
+
     for d in range(nd):
         R = class_recs[image_ids[d]]
         bb = BB[d, :].astype(float)
