@@ -537,6 +537,7 @@ def _test_loader_from_config(cfg, dataset_name, mapper=None):
         ]
         if cfg.MODEL.LOAD_PROPOSALS
         else None,
+        cfg=cfg,
     )
     if mapper is None:
         mapper = DatasetMapper(cfg, False)
@@ -552,7 +553,7 @@ def _test_loader_from_config(cfg, dataset_name, mapper=None):
 
 @configurable(from_config=_test_loader_from_config)
 def build_detection_test_loader(
-    cfg,
+    # cfg,
     dataset: Union[List[Any], torchdata.Dataset],
     *,
     mapper: Callable[[Dict[str, Any]], Any],
@@ -612,8 +613,8 @@ def build_detection_test_loader(
         sampler=sampler,
         drop_last=False,
         num_workers=num_workers,
-        collate_fn=trivial_batch_collator if collate_fn is None else collate_fn,
-        cfg=cfg
+        collate_fn=trivial_batch_collator if collate_fn is None else collate_fn
+        # cfg=cfg
     )
 
 
