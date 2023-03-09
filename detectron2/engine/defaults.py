@@ -332,7 +332,7 @@ class DefaultTrainer(TrainerBase):
        `resume_or_load` is called.
     3. Register a few common hooks defined by the config.
 
-    It is created to simplify the **standard model training workflow** and reduce code boilerplate
+    It is created to simplify the **standard model training workflow** and reduce code boilerplate 模板
     for users who only need the standard training workflow, with standard features.
     It means this class makes *many assumptions* about your training logic that
     may easily become invalid in a new research. In fact, any assumptions beyond those made in the

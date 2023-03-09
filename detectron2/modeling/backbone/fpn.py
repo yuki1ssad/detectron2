@@ -136,7 +136,7 @@ class FPN(Backbone):
                 paper convention: "p<stage>", where stage has stride = 2 ** stage e.g.,
                 ["p2", "p3", ..., "p6"].
         """
-        bottom_up_features = self.bottom_up(x)
+        bottom_up_features = self.bottom_up(x) # res2[bs,256,w,h] res3[bs,512,w/2,h/2] res4[bs,1024,w/4,h/4] res5[bs,2048,w/8,h/8]
         results = []
         prev_features = self.lateral_convs[0](bottom_up_features[self.in_features[-1]])
         results.append(self.output_convs[0](prev_features))

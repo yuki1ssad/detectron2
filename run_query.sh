@@ -28,3 +28,6 @@
 # CUDA_VISIBLE_DEVICES=0,1 python -m debugpy --listen 5555 --wait-for-client projects/QueryRCNN_OW/train_net.py --eval-only --num-gpus 2 --config-file projects/QueryRCNN_OW/configs_owod/t1_train.yaml OUTPUT_DIR "./output_fqrcnn_ow/debug" SOLVER.IMS_PER_BATCH 2 MODEL.WEIGHTS "output_fqrcnn_ow/t1_5.4iter/simOTA_nearest_uch_mem40_contrast_rep1/model_final.pth"
 # python -m debugpy --listen 5555 --wait-for-client
 # --dist-url tcp://127.0.0.1:53025
+
+
+CUDA_VISIBLE_DEVICES=0,1 python /projects/Featurized-QueryRCNN/train_net.py --eval-only --num-gpus 2 --config-file projects/Featurized-QueryRCNN/configs/OW/t1_train.yaml OUTPUT_DIR "projects/Featurized-QueryRCNN/output/t1" SOLVER.IMS_PER_BATCH 2 MODEL.WEIGHTS "projects/Featurized-QueryRCNN/output/t1/model_final.pth"

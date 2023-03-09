@@ -620,18 +620,6 @@ _C.TEST.PRECISE_BN = CN({"ENABLED": False})
 _C.TEST.PRECISE_BN.NUM_ITER = 200
 
 # ---------------------------------------------------------------------------- #
-# OpenWorld Object Detection
-# ---------------------------------------------------------------------------- #
-
-_C.OWOD = CN()
-_C.OWOD.PREV_INTRODUCED_CLS = 0
-_C.OWOD.CUR_INTRODUCED_CLS = 20
-_C.OWOD.ENERGY_SAVE_PATH = ''
-_C.OWOD.SKIP_TRAINING_WHILE_EVAL = False
-_C.OWOD.FEATURE_STORE_SAVE_PATH = ''
-_C.OWOD.TEMPERATURE = 1.5
-
-# ---------------------------------------------------------------------------- #
 # Misc options
 # ---------------------------------------------------------------------------- #
 # Directory where output files are written
