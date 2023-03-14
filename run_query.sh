@@ -1,6 +1,6 @@
 # Task 1 class : 0-20
 # train
-# CUDA_VISIBLE_DEVICES=0,1 python projects/QueryRCNN_OW/train_net.py --num-gpus 2 --resume --config-file projects/QueryRCNN_OW/configs_owod/t1_train.yaml OUTPUT_DIR "myOutput_withoutContrast/t1"
+# CUDA_VISIBLE_DEVICES=0,1 python projects_my/Featurized-QueryRCNN/train_net.py --num-gpus 2 --resume --config-file projects_my/Featurized-QueryRCNN/configs/OW/t1_train.yaml OUTPUT_DIR "projects_my/Featurized-QueryRCNN/output/t1"
 
 # Task 2 class : 20-40
 # CUDA_VISIBLE_DEVICES=0,1 python projects/QueryRCNN_OW/train_net.py --num-gpus 2 --config-file projects/QueryRCNN_OW/configs_owod/t2_train.yaml OUTPUT_DIR "myOutput/t2" MODEL.WEIGHTS "myOutput/t1/model_final.pth"
@@ -29,5 +29,3 @@
 # python -m debugpy --listen 5555 --wait-for-client
 # --dist-url tcp://127.0.0.1:53025
 
-
-CUDA_VISIBLE_DEVICES=0,1 python /projects/Featurized-QueryRCNN/train_net.py --eval-only --num-gpus 2 --config-file projects/Featurized-QueryRCNN/configs/OW/t1_train.yaml OUTPUT_DIR "projects/Featurized-QueryRCNN/output/t1" SOLVER.IMS_PER_BATCH 2 MODEL.WEIGHTS "projects/Featurized-QueryRCNN/output/t1/model_final.pth"
